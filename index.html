@@ -240,15 +240,14 @@
 
   <!-- ================= HALAMAN 1: LOGIN ================= -->
   <div id="page-login">
-    <!-- Tombol Sinyal Hijau (Akses Admin) -->
     <button class="btn-signal-admin" onclick="openAdminAuthModal()" title="Pengaturan Admin Wi-Fi">
       <svg viewBox="0 0 24 24">
         <path d="M12 3C7.03 3 2.73 5.11 0 8.42L12 21 24 8.42C21.27 5.11 16.97 3 12 3zm0 4.5c3.27 0 6.22 1.25 8.42 3.29L12 19.33 3.58 10.79C5.78 8.75 8.73 7.5 12 7.5z"/>
       </svg>
     </button>
 
-    <h2 style="margin-top: 15px;">🔑 Access Code</h2>
-    <p class="subtitle">Masukkan password/voucher untuk membuka akses Wi-Fi</p>
+    <h2 style="margin-top: 15px;">🔑 Access Code Wi-Fi</h2>
+    <p class="subtitle">Masukkan password untuk membuka akses Wi-Fi</p>
 
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="config-group">
@@ -262,7 +261,7 @@
 
   <!-- ================= HALAMAN 2: DASHBOARD WI-FI ================= -->
   <div id="page-wifi" class="hidden">
-    <h2>⚡ Akses Wi-Fi Anda</h2>
+    <h2>⚡ Akses Informasi Wi-Fi</h2>
     <p class="subtitle">Pindai QR atau salin password di bawah ini</p>
 
     <div class="wifi-config">
@@ -331,9 +330,9 @@
 
 
 <script>
-  // DEFAULT WI-FI CONFIG
-  let DEFAULT_SSID = "WIFI_PREMIUM_GLASS";
-  let DEFAULT_PASS = "kopi1234";
+  // CEK & AMBIL DATA DARI LOCALSTORAGE
+  let currentSSID = localStorage.getItem("wifi_ssid") || "WIFI_PREMIUM_GLASS";
+  let currentPASS = localStorage.getItem("wifi_pass") || "kopi1234";
 
   // HASH TARGET SHA-256 (Murni tanpa Salt)
   const ADMIN_HASH_TARGET = "2d7532e279254ca6bf0cd7954e1baf659975803338dfbc9d31058d5e8009f7ea";
@@ -345,22 +344,22 @@
   const passInput = document.getElementById("wifi-pass");
   const qrContainer = document.getElementById("qrcode");
 
-  // Sync Input Display Initial
-  ssidInput.value = DEFAULT_SSID;
-  passInput.value = DEFAULT_PASS;
+  // Sync Display Awal dari Storage
+  ssidInput.value = currentSSID;
+  passInput.value = currentPASS;
 
   // QR Code Instance
   let qrcode = new QRCode(qrContainer, { width: 120, height: 120 });
 
   function generateQRCode() {
-    const qrData = `WIFI:S:${DEFAULT_SSID};T:WPA;P:${DEFAULT_PASS};;`;
+    const qrData = `WIFI:S:${currentSSID};T:WPA;P:${currentPASS};;`;
     qrcode.clear();
     qrcode.makeCode(qrData);
   }
 
   function copyPassword() {
-    navigator.clipboard.writeText(DEFAULT_PASS);
-    alert(`Password "${DEFAULT_PASS}" berhasil disalin!`);
+    navigator.clipboard.writeText(currentPASS);
+    alert(`Password "${currentPASS}" berhasil disalin!`);
   }
 
   // Helper Enkripsi SHA-256 Standar (Murni)
@@ -377,9 +376,6 @@
     event.preventDefault();
     const rawPass = document.getElementById("password").value;
     const encryptedPassword = await hashSHA256(rawPass);
-
-    console.log("=== DATA LOGIN USER ===");
-    console.log("Password Hash SHA-256:", encryptedPassword);
 
     generateQRCode();
 
@@ -405,7 +401,7 @@
     document.getElementById(modalId).classList.add("hidden");
   }
 
-  // Verifikasi Password Admin Menggunakan Hash Target Murni
+  // Verifikasi Password Admin
   async function verifyAdminPassword() {
     const inputPass = document.getElementById("admin-pass").value;
     const hashedInput = await hashSHA256(inputPass);
@@ -413,8 +409,8 @@
     if (hashedInput === ADMIN_HASH_TARGET) {
       closeModal("modal-admin-auth");
       
-      document.getElementById("edit-ssid").value = DEFAULT_SSID;
-      document.getElementById("edit-pass").value = DEFAULT_PASS;
+      document.getElementById("edit-ssid").value = currentSSID;
+      document.getElementById("edit-pass").value = currentPASS;
       
       document.getElementById("modal-admin-config").classList.remove("hidden");
     } else {
@@ -422,7 +418,7 @@
     }
   }
 
-  // Simpan Perubahan Wi-Fi
+  // SIMPAN PERUBAHAN PERMANEN KE LOCALSTORAGE
   function saveWifiConfig() {
     const newSSID = document.getElementById("edit-ssid").value.trim();
     const newPass = document.getElementById("edit-pass").value.trim();
@@ -432,14 +428,18 @@
       return;
     }
 
-    DEFAULT_SSID = newSSID;
-    DEFAULT_PASS = newPass;
+    currentSSID = newSSID;
+    currentPASS = newPass;
 
-    ssidInput.value = DEFAULT_SSID;
-    passInput.value = DEFAULT_PASS;
+    // SIMPAN KE MEMORI BROWSER
+    localStorage.setItem("wifi_ssid", currentSSID);
+    localStorage.setItem("wifi_pass", currentPASS);
+
+    ssidInput.value = currentSSID;
+    passInput.value = currentPASS;
 
     closeModal("modal-admin-config");
-    alert("Konfigurasi Wi-Fi Berhasil Diperbarui!");
+    alert("Konfigurasi Wi-Fi Berhasil Disimpan Permanen!");
   }
 </script>
 
