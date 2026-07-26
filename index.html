@@ -25,16 +25,35 @@ body {
     box-shadow: 0 0 15px rgba(0,0,0,.2);
 }
 
+.input-container {
+    position: relative;
+    margin: 15px 0;
+}
+
 input {
     width: 100%;
-    padding: 12px;
-    margin: 15px 0;
+    padding: 12px 40px 12px 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     box-sizing: border-box;
+    font-size: 14px;
 }
 
-button {
+.toggle-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    width: auto;
+    color: #64748b;
+}
+
+button.primary-btn {
     width: 100%;
     padding: 12px;
     background: #2563eb;
@@ -46,13 +65,21 @@ button {
     transition: background 0.2s;
 }
 
-button:hover {
+button.primary-btn:hover {
     background: #1d4ed8;
 }
 
 button.logout-btn {
+    width: 100%;
+    padding: 12px;
     background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
     margin-top: 15px;
+    transition: background 0.2s;
 }
 
 button.logout-btn:hover {
@@ -76,27 +103,31 @@ button.logout-btn:hover {
     <!-- TAMPILAN LOGIN -->
     <div id="login-section">
         <h2>Portal Login</h2>
-        <input type="password" id="password" placeholder="Masukkan Password" onkeyup="checkEnter(event)">
-        <button onclick="login()">Masuk</button>
+        
+        <div class="input-container">
+            <input type="password" id="password" placeholder="Masukkan Password" onkeyup="checkEnter(event)" oninput="clearError()">
+            <button class="toggle-btn" onclick="togglePasswordVisibility()" type="button" id="eye-icon">👁</button>
+        </div>
+
+        <button class="primary-btn" onclick="login()">Masuk</button>
         <p id="error"></p>
     </div>
 
     <!-- TAMPILAN JIKA SUDAH LOGIN -->
     <div id="authenticated-section" class="hidden">
         <h2>Selamat Datang!</h2>
-        <p style="margin: 15px 0; color: #475569;">Anda berhasil masuk ke portal resmi.</p>
+        <p style="margin: 15px 0; color: #475569;">Sesi Anda aktif.</p>
         
-        <button onclick="goToWifiPage()">Buka Halaman WiFi 📶</button>
+        <button class="primary-btn" onclick="goToWifiPage()">Buka Halaman WiFi 📶</button>
         <button class="logout-btn" onclick="logout()">Keluar (Logout)</button>
     </div>
 </div>
 
 <script>
-// Hash SHA-256 dari password "penguna1122330"
-// Password asli tidak tersimpan di kode JS
-const PASSWORD_HASH = "penguna1122330";
+// Hash SHA-256 dari teks: "penguna1122330"
+const PASSWORD_HASH = "4a2b9e663a7f8050901b0f15c7110ad2ee926e838f72df894c25bd2a63273412";
 
-// Fungsi untuk mengubah string ke Hash SHA-256 menggunakan Web Crypto API
+// Fungsi untuk membuat Hash SHA-256 via Web Crypto API
 async function sha256(str) {
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf))
@@ -104,7 +135,7 @@ async function sha256(str) {
         .join('');
 }
 
-// Cek status login saat halaman pertama kali dimuat
+// Cek status sesi saat halaman dibuka
 window.onload = function() {
     if (sessionStorage.getItem("isLoggedIn") === "true") {
         showAuthenticatedUI();
@@ -113,27 +144,27 @@ window.onload = function() {
 
 async function login() {
     const inputPass = document.getElementById("password").value;
+    
+    if(!inputPass) {
+        document.getElementById("error").innerText = "Password tidak boleh kosong!";
+        return;
+    }
+
     const inputHash = await sha256(inputPass);
 
     if (inputHash === PASSWORD_HASH) {
-        // Simpan status login di session storage
+        // Simpan sesi login
         sessionStorage.setItem("isLoggedIn", "true");
         
-        // Tampilkan halaman sukses / logout
-        showAuthenticatedUI();
-        
-        // Opsional: Langsung redirect jika diinginkan
-        window.location.href = "https://azizuser.github.io/WIFI-PAGE/";
+        // Arahkan langsung ke halaman WiFi Target
+        goToWifiPage();
     } else {
         document.getElementById("error").innerText = "Password salah!";
     }
 }
 
 function logout() {
-    // Hapus status login dari session storage
     sessionStorage.removeItem("isLoggedIn");
-    
-    // Tampilkan kembali form login
     document.getElementById("login-section").classList.remove("hidden");
     document.getElementById("authenticated-section").classList.add("hidden");
     document.getElementById("password").value = "";
@@ -152,6 +183,23 @@ function goToWifiPage() {
 function checkEnter(event) {
     if (event.key === "Enter") {
         login();
+    }
+}
+
+function clearError() {
+    document.getElementById("error").innerText = "";
+}
+
+function togglePasswordVisibility() {
+    const passInput = document.getElementById("password");
+    const eyeIcon = document.getElementById("eye-icon");
+    
+    if (passInput.type === "password") {
+        passInput.type = "text";
+        eyeIcon.innerText = "🙈";
+    } else {
+        passInput.type = "password";
+        eyeIcon.innerText = "👁";
     }
 }
 </script>
