@@ -1,208 +1,303 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Login Terenkripsi</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra Secure Glass Portal</title>
+  <!-- QR Code Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, -apple-system, sans-serif; }
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-}
+    body {
+      background: #090d16;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.25) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.25) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
 
-.box {
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    width: 320px;
-    text-align: center;
-    box-shadow: 0 0 15px rgba(0,0,0,.2);
-}
+    /* Card Glassmorphism Utama */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      text-align: center;
+      position: relative;
+    }
 
-.input-container {
-    position: relative;
-    margin: 15px 0;
-}
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #38bdf8, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
 
-input {
-    width: 100%;
-    padding: 12px 40px 12px 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 14px;
-}
+    p.subtitle {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      margin-bottom: 22px;
+    }
 
-.toggle-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0;
-    width: auto;
-    color: #64748b;
-}
+    /* Style Form & Inputs */
+    .config-group { margin-bottom: 14px; text-align: left; }
+    .config-group label {
+      font-size: 0.72rem;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
 
-button.primary-btn {
-    width: 100%;
-    padding: 12px;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.2s;
-}
+    .input-wrapper { display: flex; gap: 8px; }
 
-button.primary-btn:hover {
-    background: #1d4ed8;
-}
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      outline: none;
+      font-size: 0.88rem;
+      transition: all 0.3s ease;
+    }
 
-button.logout-btn {
-    width: 100%;
-    padding: 12px;
-    background: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 15px;
-    transition: background 0.2s;
-}
+    /* Style khusus input yang dikunci (read-only) */
+    input[readonly] {
+      background: rgba(255, 255, 255, 0.02);
+      color: #cbd5e1;
+      border-color: rgba(255, 255, 255, 0.05);
+      cursor: not-allowed;
+    }
 
-button.logout-btn:hover {
-    background: #dc2626;
-}
+    input:focus:not([readonly]) {
+      border-color: #38bdf8;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+    }
 
-#error {
-    color: #ef4444;
-    margin-top: 10px;
-    font-size: 14px;
-}
+    /* Box Info Wi-Fi (Halaman 2) */
+    .wifi-config {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
 
-.hidden {
-    display: none;
-}
-</style>
+    /* QR Code Wrapper */
+    .qr-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 14px;
+      border-radius: 18px;
+      display: inline-block;
+      margin: 10px 0 6px 0;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    #qrcode img { margin: 0 auto; }
+
+    /* Buttons */
+    .btn-copy {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #0f172a;
+      border: none;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .btn-copy:hover {
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-login {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    }
+    .btn-login:hover {
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .btn-logout {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    .btn-logout:hover {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
 
-<div class="box">
-    <!-- TAMPILAN FORM LOGIN -->
-    <div id="login-section">
-        <h2>Portal Login</h2>
-        
-        <div class="input-container">
-            <input type="password" id="password" placeholder="Masukkan Password" onkeyup="checkEnter(event)" oninput="clearError()">
-            <button class="toggle-btn" onclick="togglePasswordVisibility()" type="button" id="eye-icon">👁</button>
+<div class="glass-card">
+
+  <!-- ================= HALAMAN 1: LOGIN (PASSWORD ONLY) ================= -->
+  <div id="page-login">
+    <h2>🔑 Access Code</h2>
+    <p class="subtitle">Masukkan password/voucher untuk membuka akses Wi-Fi</p>
+
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="config-group">
+        <label for="password">Password Access</label>
+        <input type="password" id="password" placeholder="Masukkan password" required>
+      </div>
+      <button type="submit" class="btn btn-login">MASUK (ENKRIPSI SHA-256)</button>
+    </form>
+  </div>
+
+
+  <!-- ================= HALAMAN 2: DASHBOARD WI-FI ================= -->
+  <div id="page-wifi" class="hidden">
+    <h2>⚡ Akses Informasi WI-FI</h2>
+    <p class="subtitle">Pindai QR atau salin password di bawah ini</p>
+
+    <!-- Box Informasi Wi-Fi (Terkunci / Read-Only) -->
+    <div class="wifi-config">
+      <div class="config-group">
+        <label for="wifi-ssid">Nama Wi-Fi (SSID)</label>
+        <input type="text" id="wifi-ssid" readonly>
+      </div>
+      <div class="config-group" style="margin-bottom: 0;">
+        <label for="wifi-pass">Password Wi-Fi</label>
+        <div class="input-wrapper">
+          <input type="text" id="wifi-pass" readonly>
+          <button class="btn-copy" onclick="copyPassword()">Salin</button>
         </div>
-
-        <button class="primary-btn" onclick="login()">Masuk</button>
-        <p id="error"></p>
+      </div>
     </div>
 
-    <!-- TAMPILAN DASHBOARD SETELAH LOGIN / LOGOUT -->
-    <div id="authenticated-section" class="hidden">
-        <h2>Selamat Datang!</h2>
-        <p style="margin: 15px 0; color: #475569;">Sesi Anda sedang aktif.</p>
-        
-        <button class="primary-btn" onclick="goToWifiPage()">Buka Halaman WiFi 📶</button>
-        <button class="logout-btn" onclick="logout()">Keluar (Logout)</button>
+    <!-- QR Code Area -->
+    <div class="qr-container">
+      <div id="qrcode"></div>
     </div>
+    <p style="font-size: 0.73rem; color: #94a3b8; margin-top: 6px; margin-bottom: 12px;">
+      Scan QR code dengan HP untuk langsung terkoneksi
+    </p>
+
+    <button onclick="handleLogout()" class="btn btn-logout">Keluar Halaman Ini</button>
+  </div>
+
 </div>
 
 <script>
-// Hash SHA-256 murni dari "penguna1122330" & "pengguna1122330"
-const VALID_HASHES = [
-    "37ed97d7e217a3a28768074895bbf6faec80ba560984cc17b996bd2dada42747", // penguna1122330
-    "311545ee9bf5cdfd1cf0ccaa022ffaa1b2a94fb2a694bf6efc2f42a98f1f58b8"  // pengguna1122330
-];
+  // ATUR NAMA WIFI DAN PASSWORD DI SINI (Ubah sesuai keinginanmu)
+  const DEFAULT_SSID = "WIFI_PREMIUM_GLASS";
+  const DEFAULT_PASS = "kopi1234";
 
-// Fungsi merubah teks ke SHA-256 via Web Crypto API
-async function sha256(str) {
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-}
+  // SALT KUSTOM UNTUK KEAMANAN ENKRIPSI
+  const GLOBAL_SALT = "Wi-Fi_S3cur3_S@lt_2026!";
 
-// Cek status sesi login ketika halaman dimuat
-window.onload = function() {
-    if (sessionStorage.getItem("isLoggedIn") === "true") {
-        showAuthenticatedUI();
-    }
-};
+  // DOM Elements
+  const pageLogin = document.getElementById("page-login");
+  const pageWifi = document.getElementById("page-wifi");
+  const ssidInput = document.getElementById("wifi-ssid");
+  const passInput = document.getElementById("wifi-pass");
+  const qrContainer = document.getElementById("qrcode");
 
-async function login() {
-    const rawInput = document.getElementById("password").value;
-    const cleanInput = rawInput.trim();
-    
-    if(!cleanInput) {
-        document.getElementById("error").innerText = "Password tidak boleh kosong!";
-        return;
-    }
+  // Inisialisasi nilai SSID & Password bawaan
+  ssidInput.value = DEFAULT_SSID;
+  passInput.value = DEFAULT_PASS;
 
-    const inputHash = await sha256(cleanInput);
+  // Inisialisasi QR Code Instance
+  let qrcode = new QRCode(qrContainer, {
+    width: 120,
+    height: 120
+  });
 
-    if (VALID_HASHES.includes(inputHash)) {
-        sessionStorage.setItem("isLoggedIn", "true");
-        goToWifiPage();
-    } else {
-        document.getElementById("error").innerText = "Password salah!";
-    }
-}
+  // Function Generate QR Code
+  function generateQRCode() {
+    const qrData = `WIFI:S:${DEFAULT_SSID};T:WPA;P:${DEFAULT_PASS};;`;
+    qrcode.clear();
+    qrcode.makeCode(qrData);
+  }
 
-function logout() {
-    sessionStorage.removeItem("isLoggedIn");
-    document.getElementById("login-section").classList.remove("hidden");
-    document.getElementById("authenticated-section").classList.add("hidden");
+  // Salin Password ke Clipboard
+  function copyPassword() {
+    navigator.clipboard.writeText(DEFAULT_PASS);
+    alert(`Password "${DEFAULT_PASS}" berhasil disalin!`);
+  }
+
+  // Fungsi Enkripsi SHA-256
+  async function hashSHA256(str) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Login Handler
+  async function handleLogin(event) {
+    event.preventDefault();
+    const rawPass = document.getElementById("password").value;
+
+    // Enkripsi Password + Salt
+    const saltedPassword = rawPass + GLOBAL_SALT;
+    const encryptedPassword = await hashSHA256(saltedPassword);
+
+    console.log("=== DATA LOGIN ===");
+    console.log("Password Hash (+Salt):", encryptedPassword);
+
+    // Generate QR Code saat pindah halaman
+    generateQRCode();
+
+    // Sembunyikan Halaman 1 (Login), Tampilkan Halaman 2 (Wi-Fi)
+    pageLogin.classList.add("hidden");
+    pageWifi.classList.remove("hidden");
+  }
+
+  // Logout Handler
+  function handleLogout() {
     document.getElementById("password").value = "";
-    document.getElementById("error").innerText = "";
-}
-
-function showAuthenticatedUI() {
-    document.getElementById("login-section").classList.add("hidden");
-    document.getElementById("authenticated-section").classList.remove("hidden");
-}
-
-function goToWifiPage() {
-    window.location.href = "https://azizuser.github.io/WIFI-PAGE/";
-}
-
-function checkEnter(event) {
-    if (event.key === "Enter") {
-        login();
-    }
-}
-
-function clearError() {
-    document.getElementById("error").innerText = "";
-}
-
-function togglePasswordVisibility() {
-    const passInput = document.getElementById("password");
-    const eyeIcon = document.getElementById("eye-icon");
     
-    if (passInput.type === "password") {
-        passInput.type = "text";
-        eyeIcon.innerText = "🙈";
-    } else {
-        passInput.type = "password";
-        eyeIcon.innerText = "👁";
-    }
-}
+    // Sembunyikan Halaman 2 (Wi-Fi), Tampilkan Halaman 1 (Login)
+    pageWifi.classList.add("hidden");
+    pageLogin.classList.remove("hidden");
+  }
 </script>
 
 </body>
