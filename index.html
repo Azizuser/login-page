@@ -328,13 +328,33 @@
   </div>
 </div>
 
+<!-- ================= SCRIPT FIREBASE & APP LOGIC ================= -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-<script>
-  // CEK & AMBIL DATA DARI LOCALSTORAGE
-  let currentSSID = localStorage.getItem("wifi_ssid") || "WIFI_PREMIUM_GLASS";
-  let currentPASS = localStorage.getItem("wifi_pass") || "kopi1234";
+  // Configuration dari Project Firebase Kamu
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoK2cQGelo16fQ-zXEte2GfFivyOXYQsk",
+    authDomain: "my-page-489f5.firebaseapp.com",
+    databaseURL: "https://my-page-489f5-default-rtdb.firebaseio.com",
+    projectId: "my-page-489f5",
+    storageBucket: "my-page-489f5.firebasestorage.app",
+    messagingSenderId: "632587000538",
+    appId: "1:632587000538:web:bd331ca49acd265154e3e3",
+    measurementId: "G-DSVY49TTCB"
+  };
 
-  // HASH TARGET SHA-256 (Murni tanpa Salt)
+  // Init Firebase App & Database
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const wifiRef = ref(db, 'wifiConfig');
+
+  // Variable Global State Wi-Fi
+  window.currentSSID = "WIFI_PREMIUM_GLASS";
+  window.currentPASS = "kopi1234";
+
+  // HASH TARGET SHA-256 (Admin: admin123)
   const ADMIN_HASH_TARGET = "2d7532e279254ca6bf0cd7954e1baf659975803338dfbc9d31058d5e8009f7ea";
 
   // DOM Elements
@@ -344,23 +364,31 @@
   const passInput = document.getElementById("wifi-pass");
   const qrContainer = document.getElementById("qrcode");
 
-  // Sync Display Awal dari Storage
-  ssidInput.value = currentSSID;
-  passInput.value = currentPASS;
-
   // QR Code Instance
   let qrcode = new QRCode(qrContainer, { width: 120, height: 120 });
 
+  // SINKRONISASI REALTIME DARI FIREBASE
+  onValue(wifiRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      window.currentSSID = data.ssid || "WIFI_PREMIUM_GLASS";
+      window.currentPASS = data.pass || "kopi1234";
+    }
+    ssidInput.value = window.currentSSID;
+    passInput.value = window.currentPASS;
+    generateQRCode();
+  });
+
   function generateQRCode() {
-    const qrData = `WIFI:S:${currentSSID};T:WPA;P:${currentPASS};;`;
+    const qrData = `WIFI:S:${window.currentSSID};T:WPA;P:${window.currentPASS};;`;
     qrcode.clear();
     qrcode.makeCode(qrData);
   }
 
-  function copyPassword() {
-    navigator.clipboard.writeText(currentPASS);
-    alert(`Password "${currentPASS}" berhasil disalin!`);
-  }
+  window.copyPassword = function() {
+    navigator.clipboard.writeText(window.currentPASS);
+    alert(`Password "${window.currentPASS}" berhasil disalin!`);
+  };
 
   // Helper Enkripsi SHA-256 Standar (Murni)
   async function hashSHA256(str) {
@@ -372,54 +400,50 @@
   }
 
   // Login Handler User
-  async function handleLogin(event) {
+  window.handleLogin = async function(event) {
     event.preventDefault();
-    const rawPass = document.getElementById("password").value;
-    const encryptedPassword = await hashSHA256(rawPass);
-
     generateQRCode();
-
     pageLogin.classList.add("hidden");
     pageWifi.classList.remove("hidden");
-  }
+  };
 
   // Logout Handler
-  function handleLogout() {
+  window.handleLogout = function() {
     document.getElementById("password").value = "";
     pageWifi.classList.add("hidden");
     pageLogin.classList.remove("hidden");
-  }
+  };
 
   // ================= ADMIN CONFIG LOGIC =================
 
-  function openAdminAuthModal() {
+  window.openAdminAuthModal = function() {
     document.getElementById("admin-pass").value = "";
     document.getElementById("modal-admin-auth").classList.remove("hidden");
-  }
+  };
 
-  function closeModal(modalId) {
+  window.closeModal = function(modalId) {
     document.getElementById(modalId).classList.add("hidden");
-  }
+  };
 
   // Verifikasi Password Admin
-  async function verifyAdminPassword() {
+  window.verifyAdminPassword = async function() {
     const inputPass = document.getElementById("admin-pass").value;
     const hashedInput = await hashSHA256(inputPass);
 
     if (hashedInput === ADMIN_HASH_TARGET) {
-      closeModal("modal-admin-auth");
+      window.closeModal("modal-admin-auth");
       
-      document.getElementById("edit-ssid").value = currentSSID;
-      document.getElementById("edit-pass").value = currentPASS;
+      document.getElementById("edit-ssid").value = window.currentSSID;
+      document.getElementById("edit-pass").value = window.currentPASS;
       
       document.getElementById("modal-admin-config").classList.remove("hidden");
     } else {
       alert("Password Admin Salah / Akses Ditolak!");
     }
-  }
+  };
 
-  // SIMPAN PERUBAHAN PERMANEN KE LOCALSTORAGE
-  function saveWifiConfig() {
+  // SIMPAN PERUBAHAN KE CLOUD FIREBASE
+  window.saveWifiConfig = function() {
     const newSSID = document.getElementById("edit-ssid").value.trim();
     const newPass = document.getElementById("edit-pass").value.trim();
 
@@ -428,19 +452,16 @@
       return;
     }
 
-    currentSSID = newSSID;
-    currentPASS = newPass;
-
-    // SIMPAN KE MEMORI BROWSER
-    localStorage.setItem("wifi_ssid", currentSSID);
-    localStorage.setItem("wifi_pass", currentPASS);
-
-    ssidInput.value = currentSSID;
-    passInput.value = currentPASS;
-
-    closeModal("modal-admin-config");
-    alert("Konfigurasi Wi-Fi Berhasil Disimpan Permanen!");
-  }
+    set(wifiRef, {
+      ssid: newSSID,
+      pass: newPass
+    }).then(() => {
+      window.closeModal("modal-admin-config");
+      alert("Konfigurasi Wi-Fi Berhasil Disimpan & Terupdate Realtime!");
+    }).catch((error) => {
+      alert("Gagal menyimpan data ke Firebase: " + error.message);
+    });
+  };
 </script>
 
 </body>
