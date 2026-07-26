@@ -1,468 +1,354 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultra Secure Glass Portal</title>
-  <!-- QR Code Library CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, -apple-system, sans-serif; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Wi-Fi</title>
+    
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- CryptoJS (Verifikasi Hash SHA-256) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-    body {
-      background: #090d16;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.25) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.25) 0px, transparent 50%),
-        radial-gradient(at 50% 50%, rgba(14, 165, 233, 0.15) 0px, transparent 50%);
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-      overflow-x: hidden;
-    }
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-    /* Card Glassmorphism Utama */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 24px;
-      padding: 32px 28px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 
-                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      text-align: center;
-      position: relative;
-    }
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-color: #f8fafc;
+            --danger-color: #ef4444;
+        }
 
-    /* Tombol Lingkaran Sinyal Hijau (Pojok Kiri Atas) */
-    .btn-signal-admin {
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(34, 197, 94, 0.15);
-      border: 1px solid rgba(34, 197, 94, 0.6);
-      color: #22c55e;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
-      transition: all 0.3s ease;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    .btn-signal-admin:hover {
-      transform: scale(1.1);
-      background: rgba(34, 197, 94, 0.3);
-      box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .btn-signal-admin svg {
-      width: 20px;
-      height: 20px;
-      fill: #22c55e;
-      filter: drop-shadow(0 0 5px #22c55e);
-    }
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+            position: relative;
+        }
 
-    h2 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      background: linear-gradient(135deg, #38bdf8, #a855f7);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
-    }
+        /* Ikon SVG Wi-Fi Berpendar */
+        .admin-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
 
-    p.subtitle {
-      font-size: 0.82rem;
-      color: #94a3b8;
-      margin-bottom: 22px;
-    }
+        .admin-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));
+            animation: pulse-glow 2s infinite alternate;
+        }
 
-    .config-group { margin-bottom: 14px; text-align: left; }
-    .config-group label {
-      font-size: 0.72rem;
-      color: #38bdf8;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-    }
+        .admin-btn:hover {
+            transform: scale(1.15);
+        }
 
-    .input-wrapper { display: flex; gap: 8px; }
+        @keyframes pulse-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.4));
+                opacity: 0.7;
+            }
+            100% {
+                filter: drop-shadow(0 0 8px rgba(56, 189, 248, 1));
+                opacity: 1;
+            }
+        }
 
-    input {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.04);
-      color: #fff;
-      outline: none;
-      font-size: 0.88rem;
-      transition: all 0.3s ease;
-    }
+        h2 {
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
 
-    input[readonly] {
-      background: rgba(255, 255, 255, 0.02);
-      color: #cbd5e1;
-      border-color: rgba(255, 255, 255, 0.05);
-      cursor: not-allowed;
-    }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
 
-    input:focus:not([readonly]) {
-      border-color: #38bdf8;
-      background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
-    }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
 
-    .wifi-config {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 16px;
-      border-radius: 16px;
-      margin-bottom: 18px;
-      text-align: left;
-    }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 14px;
+        }
 
-    .qr-container {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 14px;
-      border-radius: 18px;
-      display: inline-block;
-      margin: 10px 0 6px 0;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    }
-    #qrcode img { margin: 0 auto; }
+        button.btn-primary {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
 
-    .btn-copy {
-      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-      color: #0f172a;
-      border: none;
-      padding: 0 16px;
-      border-radius: 10px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-    }
-    .btn-copy:hover {
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
-      transform: translateY(-1px);
-    }
+        button.btn-danger {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            margin-top: 15px;
+        }
 
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 10px;
-      letter-spacing: 0.5px;
-    }
+        button.btn-primary:hover, button.btn-danger:hover {
+            opacity: 0.85;
+        }
 
-    .btn-login {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-    }
-    .btn-login:hover {
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
-      transform: translateY(-1px);
-    }
+        #qrcode {
+            margin: 20px auto;
+            padding: 15px;
+            background: #fff;
+            border-radius: 12px;
+            display: inline-block;
+        }
 
-    .btn-logout {
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-    }
-    .btn-logout:hover {
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-      transform: translateY(-1px);
-    }
+        .info-box {
+            background-color: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
 
-    /* Modal / Pop-Up Overlay */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      padding: 20px;
-    }
+        .info-item {
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
 
-    .modal-card {
-      background: #0f172a;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 20px;
-      padding: 24px;
-      width: 100%;
-      max-width: 350px;
-      box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
-      text-align: center;
-    }
+        .info-item span {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
 
-    .btn-cancel {
-      background: rgba(255,255,255,0.1);
-      color: #94a3b8;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      width: 100%;
-      margin-top: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .hidden { display: none !important; }
-  </style>
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
 
-<div class="glass-card">
-
-  <!-- ================= HALAMAN 1: LOGIN ================= -->
-  <div id="page-login">
-    <button class="btn-signal-admin" onclick="openAdminAuthModal()" title="Pengaturan Admin Wi-Fi">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 3C7.03 3 2.73 5.11 0 8.42L12 21 24 8.42C21.27 5.11 16.97 3 12 3zm0 4.5c3.27 0 6.22 1.25 8.42 3.29L12 19.33 3.58 10.79C5.78 8.75 8.73 7.5 12 7.5z"/>
-      </svg>
-    </button>
-
-    <h2 style="margin-top: 15px;">🔑 Access Code Wi-Fi</h2>
-    <p class="subtitle">Masukkan password untuk membuka akses Wi-Fi</p>
-
-    <form id="login-form" onsubmit="handleLogin(event)">
-      <div class="config-group">
-        <label for="password">Password Access</label>
-        <input type="password" id="password" placeholder="Masukkan password" required>
-      </div>
-      <button type="submit" class="btn btn-login">MASUK (ENKRIPSI SHA-256)</button>
-    </form>
-  </div>
-
-
-  <!-- ================= HALAMAN 2: DASHBOARD WI-FI ================= -->
-  <div id="page-wifi" class="hidden">
-    <h2>⚡ Akses Informasi Wi-Fi</h2>
-    <p class="subtitle">Pindai QR atau salin password di bawah ini</p>
-
-    <div class="wifi-config">
-      <div class="config-group">
-        <label for="wifi-ssid">Nama Wi-Fi (SSID)</label>
-        <input type="text" id="wifi-ssid" readonly>
-      </div>
-      <div class="config-group" style="margin-bottom: 0;">
-        <label for="wifi-pass">Password Wi-Fi</label>
-        <div class="input-wrapper">
-          <input type="text" id="wifi-pass" readonly>
-          <button class="btn-copy" onclick="copyPassword()">Salin</button>
+    <!-- 1. HALAMAN LOGIN USER -->
+    <div id="userLoginCard" class="container">
+        <!-- Ikon Sinyal Wi-Fi Berpendar -->
+        <button class="admin-btn" title="Login Admin" onclick="openAdminModalFromStart()">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 18c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm6.36-4.95a8.98 8.98 0 0 0-12.72 0l1.41 1.41a6.98 6.98 0 0 1 9.9 0l1.41-1.41zm3.54-3.54a13.96 13.96 0 0 0-19.8 0l1.41 1.41a11.97 11.97 0 0 1 16.97 0l1.42-1.41z"/>
+            </svg>
+        </button>
+        
+        <h2>Akses Wi-Fi</h2>
+        <div class="input-group">
+            <label>Masukkan Passcode Kunjungan:</label>
+            <input type="password" id="userPassInput" placeholder="Password User...">
         </div>
-      </div>
+        <button class="btn-primary" onclick="loginUser()">Masuk User</button>
     </div>
 
-    <div class="qr-container">
-      <div id="qrcode"></div>
+    <!-- 2. HALAMAN UTAMA (QR CODE & DETAIL) -->
+    <div id="wifiCard" class="container hidden">
+        <!-- Ikon Sinyal Wi-Fi Berpendar -->
+        <button class="admin-btn" title="Panel Admin" onclick="openAdminModal()">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 18c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm6.36-4.95a8.98 8.98 0 0 0-12.72 0l1.41 1.41a6.98 6.98 0 0 1 9.9 0l1.41-1.41zm3.54-3.54a13.96 13.96 0 0 0-19.8 0l1.41 1.41a11.97 11.97 0 0 1 16.97 0l1.42-1.41z"/>
+            </svg>
+        </button>
+        <h2>Scan Wi-Fi</h2>
+        
+        <div id="qrcode"></div>
+
+        <div class="info-box">
+            <div class="info-item">SSID: <span id="displaySSID">Loading...</span></div>
+            <div class="info-item">Password: <span id="displayPass">Loading...</span></div>
+        </div>
+
+        <!-- Tombol Logout -->
+        <button class="btn-primary btn-danger" onclick="logout()">Logout / Keluar</button>
     </div>
-    <p style="font-size: 0.73rem; color: #94a3b8; margin-top: 6px; margin-bottom: 12px;">
-      Scan QR code dengan HP untuk langsung terkoneksi
-    </p>
 
-    <button onclick="handleLogout()" class="btn btn-logout">Keluar Halaman Ini</button>
-  </div>
-
-</div>
-
-
-<!-- ================= MODAL AUTH ADMIN ================= -->
-<div id="modal-admin-auth" class="modal-overlay hidden">
-  <div class="modal-card">
-    <h3 style="color: #38bdf8; margin-bottom: 8px;">⚙️ Verifikasi Admin</h3>
-    <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 16px;">Masukkan Password Admin untuk membuka panel pengaturan</p>
-    
-    <div class="config-group">
-      <label for="admin-pass">Password Admin</label>
-      <input type="password" id="admin-pass" placeholder="Password admin">
+    <!-- 3. MODAL LOGIN ADMIN -->
+    <div id="adminLoginCard" class="container hidden">
+        <h2>Login Admin</h2>
+        <div class="input-group">
+            <label>Password Admin:</label>
+            <input type="password" id="adminPassInput" placeholder="Password Admin...">
+        </div>
+        <button class="btn-primary" onclick="loginAdmin()">Masuk Admin</button>
+        <button class="btn-primary" style="background: #334155; color: #fff; margin-top: 5px;" onclick="closeAdminModal()">Batal</button>
     </div>
-    
-    <button onclick="verifyAdminPassword()" class="btn btn-login">VERIFIKASI</button>
-    <button onclick="closeModal('modal-admin-auth')" class="btn-cancel">Batal</button>
-  </div>
-</div>
 
-
-<!-- ================= MODAL CONFIG WI-FI ================= -->
-<div id="modal-admin-config" class="modal-overlay hidden">
-  <div class="modal-card">
-    <h3 style="color: #22c55e; margin-bottom: 8px;">📶 Edit Wi-Fi Realtime</h3>
-    <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 16px;">Ubah SSID dan Password Wi-Fi utama</p>
-    
-    <div class="config-group">
-      <label for="edit-ssid">SSID Baru</label>
-      <input type="text" id="edit-ssid">
+    <!-- 4. MODAL PANEL ADMIN (EDIT SSID & PASS) -->
+    <div id="adminPanelCard" class="container hidden">
+        <h2>Pengaturan Wi-Fi</h2>
+        <div class="input-group">
+            <label>SSID Baru:</label>
+            <input type="text" id="editSSID">
+        </div>
+        <div class="input-group">
+            <label>Password Wi-Fi Baru:</label>
+            <input type="text" id="editPass">
+        </div>
+        <button class="btn-primary" onclick="saveWifiConfig()">Simpan Perubahan</button>
+        <button class="btn-primary" style="background: #334155; color: #fff; margin-top: 5px;" onclick="closeAdminPanel()">Tutup</button>
     </div>
-    <div class="config-group">
-      <label for="edit-pass">Password Wi-Fi Baru</label>
-      <input type="text" id="edit-pass">
-    </div>
-    
-    <button onclick="saveWifiConfig()" class="btn btn-login">SIMPAN PERUBAHAN</button>
-    <button onclick="closeModal('modal-admin-config')" class="btn-cancel">Batal</button>
-  </div>
-</div>
 
-<!-- ================= SCRIPT FIREBASE & APP LOGIC ================= -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://my-page-489f5-default-rtdb.firebaseio.com"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-  // Configuration dari Project Firebase Kamu
-  const firebaseConfig = {
-    apiKey: "AIzaSyCoK2cQGelo16fQ-zXEte2GfFivyOXYQsk",
-    authDomain: "my-page-489f5.firebaseapp.com",
-    databaseURL: "https://my-page-489f5-default-rtdb.firebaseio.com",
-    projectId: "my-page-489f5",
-    storageBucket: "my-page-489f5.firebasestorage.app",
-    messagingSenderId: "632587000538",
-    appId: "1:632587000538:web:bd331ca49acd265154e3e3",
-    measurementId: "G-DSVY49TTCB"
-  };
+        let qrcode = new QRCode(document.getElementById("qrcode"), { width: 180, height: 180 });
+        
+        // HASH SHA-256
+        const USER_HASH = "21c9510f4e26c50a7fa3cb4bd061ed4155fb63cfcfea75fa4a7aeb02e825e746";
+        const ADMIN_HASH = "2d7532e279254ca6bf0cd7954e1baf659975803338dfbc9d31058d5e8009f7ea";
 
-  // Init Firebase App & Database
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const wifiRef = ref(db, 'wifiConfig');
+        let cameFromStart = false;
 
-  // Variable Global State Wi-Fi
-  window.currentSSID = "WIFI_PREMIUM_GLASS";
-  window.currentPASS = "kopi1234";
+        function getHash(text) {
+            return CryptoJS.SHA256(text).toString();
+        }
 
-  // HASH TARGET SHA-256 (Admin: admin123)
-  const ADMIN_HASH_TARGET = "2d7532e279254ca6bf0cd7954e1baf659975803338dfbc9d31058d5e8009f7ea";
+        database.ref('wifiConfig').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const ssid = data.ssid || "-";
+                const pass = data.pass || "-";
 
-  // DOM Elements
-  const pageLogin = document.getElementById("page-login");
-  const pageWifi = document.getElementById("page-wifi");
-  const ssidInput = document.getElementById("wifi-ssid");
-  const passInput = document.getElementById("wifi-pass");
-  const qrContainer = document.getElementById("qrcode");
+                document.getElementById('displaySSID').innerText = ssid;
+                document.getElementById('displayPass').innerText = pass;
 
-  // QR Code Instance
-  let qrcode = new QRCode(qrContainer, { width: 120, height: 120 });
+                document.getElementById('editSSID').value = ssid;
+                document.getElementById('editPass').value = pass;
 
-  // SINKRONISASI REALTIME DARI FIREBASE
-  onValue(wifiRef, (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      window.currentSSID = data.ssid || "WIFI_PREMIUM_GLASS";
-      window.currentPASS = data.pass || "kopi1234";
-    }
-    ssidInput.value = window.currentSSID;
-    passInput.value = window.currentPASS;
-    generateQRCode();
-  });
+                const qrText = `WIFI:S:${ssid};T:WPA;P:${pass};;`;
+                qrcode.clear();
+                qrcode.makeCode(qrText);
+            }
+        });
 
-  function generateQRCode() {
-    const qrData = `WIFI:S:${window.currentSSID};T:WPA;P:${window.currentPASS};;`;
-    qrcode.clear();
-    qrcode.makeCode(qrData);
-  }
+        function loginUser() {
+            const input = document.getElementById('userPassInput').value;
+            if (getHash(input) === USER_HASH) {
+                document.getElementById('userLoginCard').classList.add('hidden');
+                document.getElementById('wifiCard').classList.remove('hidden');
+                document.getElementById('userPassInput').value = '';
+            } else {
+                alert("Password Salah!");
+            }
+        }
 
-  window.copyPassword = function() {
-    navigator.clipboard.writeText(window.currentPASS);
-    alert(`Password "${window.currentPASS}" berhasil disalin!`);
-  };
+        function logout() {
+            document.getElementById('wifiCard').classList.add('hidden');
+            document.getElementById('userLoginCard').classList.remove('hidden');
+        }
 
-  // Helper Enkripsi SHA-256 Standar (Murni)
-  async function hashSHA256(str) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
+        function openAdminModalFromStart() {
+            cameFromStart = true;
+            document.getElementById('userLoginCard').classList.add('hidden');
+            document.getElementById('adminLoginCard').classList.remove('hidden');
+        }
 
-  // Login Handler User
-  window.handleLogin = async function(event) {
-    event.preventDefault();
-    generateQRCode();
-    pageLogin.classList.add("hidden");
-    pageWifi.classList.remove("hidden");
-  };
+        function openAdminModal() {
+            cameFromStart = false;
+            document.getElementById('wifiCard').classList.add('hidden');
+            document.getElementById('adminLoginCard').classList.remove('hidden');
+        }
 
-  // Logout Handler
-  window.handleLogout = function() {
-    document.getElementById("password").value = "";
-    pageWifi.classList.add("hidden");
-    pageLogin.classList.remove("hidden");
-  };
+        function closeAdminModal() {
+            document.getElementById('adminLoginCard').classList.add('hidden');
+            if (cameFromStart) {
+                document.getElementById('userLoginCard').classList.remove('hidden');
+            } else {
+                document.getElementById('wifiCard').classList.remove('hidden');
+            }
+        }
 
-  // ================= ADMIN CONFIG LOGIC =================
+        function loginAdmin() {
+            const input = document.getElementById('adminPassInput').value;
+            if (getHash(input) === ADMIN_HASH) {
+                document.getElementById('adminLoginCard').classList.add('hidden');
+                document.getElementById('adminPanelCard').classList.remove('hidden');
+                document.getElementById('adminPassInput').value = '';
+            } else {
+                alert("Password Admin Salah!");
+            }
+        }
 
-  window.openAdminAuthModal = function() {
-    document.getElementById("admin-pass").value = "";
-    document.getElementById("modal-admin-auth").classList.remove("hidden");
-  };
+        function closeAdminPanel() {
+            document.getElementById('adminPanelCard').classList.add('hidden');
+            document.getElementById('wifiCard').classList.remove('hidden');
+        }
 
-  window.closeModal = function(modalId) {
-    document.getElementById(modalId).classList.add("hidden");
-  };
+        function saveWifiConfig() {
+            const newSSID = document.getElementById('editSSID').value;
+            const newPass = document.getElementById('editPass').value;
 
-  // Verifikasi Password Admin
-  window.verifyAdminPassword = async function() {
-    const inputPass = document.getElementById("admin-pass").value;
-    const hashedInput = await hashSHA256(inputPass);
+            if (!newSSID || !newPass) {
+                alert("SSID dan Password tidak boleh kosong!");
+                return;
+            }
 
-    if (hashedInput === ADMIN_HASH_TARGET) {
-      window.closeModal("modal-admin-auth");
-      
-      document.getElementById("edit-ssid").value = window.currentSSID;
-      document.getElementById("edit-pass").value = window.currentPASS;
-      
-      document.getElementById("modal-admin-config").classList.remove("hidden");
-    } else {
-      alert("Password Admin Salah / Akses Ditolak!");
-    }
-  };
-
-  // SIMPAN PERUBAHAN KE CLOUD FIREBASE
-  window.saveWifiConfig = function() {
-    const newSSID = document.getElementById("edit-ssid").value.trim();
-    const newPass = document.getElementById("edit-pass").value.trim();
-
-    if (!newSSID || !newPass) {
-      alert("SSID dan Password tidak boleh kosong!");
-      return;
-    }
-
-    set(wifiRef, {
-      ssid: newSSID,
-      pass: newPass
-    }).then(() => {
-      window.closeModal("modal-admin-config");
-      alert("Konfigurasi Wi-Fi Berhasil Disimpan & Terupdate Realtime!");
-    }).catch((error) => {
-      alert("Gagal menyimpan data ke Firebase: " + error.message);
-    });
-  };
-</script>
-
+            database.ref('wifiConfig').set({
+                ssid: newSSID,
+                pass: newPass
+            }).then(() => {
+                alert("Data berhasil tersimpan ke Firebase!");
+                closeAdminPanel();
+            }).catch((err) => {
+                alert("Gagal menyimpan data: " + err.message);
+            });
+        }
+    </script>
 </body>
 </html>
