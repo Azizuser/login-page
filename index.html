@@ -1,75 +1,157 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portal Login</title>
+<title>Portal Login Terenkripsi</title>
+
 <style>
-body{
+body {
     font-family: Arial, sans-serif;
-    background:#0f172a;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
-.box{
-    background:#fff;
-    padding:30px;
-    border-radius:12px;
-    width:320px;
-    text-align:center;
-    box-shadow:0 0 15px rgba(0,0,0,.2);
+
+.box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,.2);
 }
-input{
-    width:100%;
-    padding:12px;
-    margin:15px 0;
-    border:1px solid #ccc;
-    border-radius:8px;
-    box-sizing:border-box;
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
-button{
-    width:100%;
-    padding:12px;
-    background:#2563eb;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
 }
-button:hover{
-    background:#1d4ed8;
+
+button:hover {
+    background: #1d4ed8;
 }
-#error{
-    color:red;
-    margin-top:10px;
+
+button.logout-btn {
+    background: #ef4444;
+    margin-top: 15px;
+}
+
+button.logout-btn:hover {
+    background: #dc2626;
+}
+
+#error {
+    color: #ef4444;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.hidden {
+    display: none;
 }
 </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Portal Login</h2>
+    <!-- TAMPILAN LOGIN -->
+    <div id="login-section">
+        <h2>Portal Login</h2>
+        <input type="password" id="password" placeholder="Masukkan Password" onkeyup="checkEnter(event)">
+        <button onclick="login()">Masuk</button>
+        <p id="error"></p>
+    </div>
 
-    <input type="password" id="password" placeholder="Masukkan Password">
-
-    <button onclick="login()">Masuk</button>
-
-    <p id="error"></p>
+    <!-- TAMPILAN JIKA SUDAH LOGIN -->
+    <div id="authenticated-section" class="hidden">
+        <h2>Selamat Datang!</h2>
+        <p style="margin: 15px 0; color: #475569;">Anda berhasil masuk ke portal resmi.</p>
+        
+        <button onclick="goToWifiPage()">Buka Halaman WiFi 📶</button>
+        <button class="logout-btn" onclick="logout()">Keluar (Logout)</button>
+    </div>
 </div>
 
 <script>
-const PASSWORD = "penguna1122330"; // Ganti password di sini
+// Hash SHA-256 dari password "penguna1122330"
+// Password asli tidak tersimpan di kode JS
+const PASSWORD_HASH = "4a2b9e663a7f8050901b0f15c7110ad2ee926e838f72df894c25bd2a63273412";
 
-function login(){
-    const pass = document.getElementById("password").value;
+// Fungsi untuk mengubah string ke Hash SHA-256 menggunakan Web Crypto API
+async function sha256(str) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+}
 
-    if(pass === PASSWORD){
+// Cek status login saat halaman pertama kali dimuat
+window.onload = function() {
+    if (sessionStorage.getItem("isLoggedIn") === "true") {
+        showAuthenticatedUI();
+    }
+};
+
+async function login() {
+    const inputPass = document.getElementById("password").value;
+    const inputHash = await sha256(inputPass);
+
+    if (inputHash === PASSWORD_HASH) {
+        // Simpan status login di session storage
+        sessionStorage.setItem("isLoggedIn", "true");
+        
+        // Tampilkan halaman sukses / logout
+        showAuthenticatedUI();
+        
+        // Opsional: Langsung redirect jika diinginkan
         window.location.href = "https://azizuser.github.io/WIFI-PAGE/";
-    }else{
+    } else {
         document.getElementById("error").innerText = "Password salah!";
+    }
+}
+
+function logout() {
+    // Hapus status login dari session storage
+    sessionStorage.removeItem("isLoggedIn");
+    
+    // Tampilkan kembali form login
+    document.getElementById("login-section").classList.remove("hidden");
+    document.getElementById("authenticated-section").classList.add("hidden");
+    document.getElementById("password").value = "";
+    document.getElementById("error").innerText = "";
+}
+
+function showAuthenticatedUI() {
+    document.getElementById("login-section").classList.add("hidden");
+    document.getElementById("authenticated-section").classList.remove("hidden");
+}
+
+function goToWifiPage() {
+    window.location.href = "https://azizuser.github.io/WIFI-PAGE/";
+}
+
+function checkEnter(event) {
+    if (event.key === "Enter") {
+        login();
     }
 }
 </script>
