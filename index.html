@@ -40,6 +40,38 @@
       position: relative;
     }
 
+    /* Tombol Lingkaran Sinyal Hijau (Pojok Kiri Atas) */
+    .btn-signal-admin {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      color: #22c55e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn-signal-admin:hover {
+      transform: scale(1.1);
+      background: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+    }
+
+    .btn-signal-admin svg {
+      width: 20px;
+      height: 20px;
+      fill: #22c55e;
+      filter: drop-shadow(0 0 5px #22c55e);
+    }
+
     h2 {
       font-size: 1.6rem;
       font-weight: 700;
@@ -56,7 +88,6 @@
       margin-bottom: 22px;
     }
 
-    /* Style Form & Inputs */
     .config-group { margin-bottom: 14px; text-align: left; }
     .config-group label {
       font-size: 0.72rem;
@@ -82,7 +113,6 @@
       transition: all 0.3s ease;
     }
 
-    /* Style khusus input yang dikunci (read-only) */
     input[readonly] {
       background: rgba(255, 255, 255, 0.02);
       color: #cbd5e1;
@@ -96,7 +126,6 @@
       box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
     }
 
-    /* Box Info Wi-Fi (Halaman 2) */
     .wifi-config {
       background: rgba(15, 23, 42, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -106,7 +135,6 @@
       text-align: left;
     }
 
-    /* QR Code Wrapper */
     .qr-container {
       background: rgba(255, 255, 255, 0.95);
       padding: 14px;
@@ -117,7 +145,6 @@
     }
     #qrcode img { margin: 0 auto; }
 
-    /* Buttons */
     .btn-copy {
       background: linear-gradient(135deg, #38bdf8, #0ea5e9);
       color: #0f172a;
@@ -168,6 +195,42 @@
       transform: translateY(-1px);
     }
 
+    /* Modal / Pop-Up Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 350px;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+      text-align: center;
+    }
+
+    .btn-cancel {
+      background: rgba(255,255,255,0.1);
+      color: #94a3b8;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      width: 100%;
+      margin-top: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -175,9 +238,16 @@
 
 <div class="glass-card">
 
-  <!-- ================= HALAMAN 1: LOGIN (PASSWORD ONLY) ================= -->
+  <!-- ================= HALAMAN 1: LOGIN ================= -->
   <div id="page-login">
-    <h2>🔑 Access Code</h2>
+    <!-- Tombol Sinyal Hijau (Akses Admin) -->
+    <button class="btn-signal-admin" onclick="openAdminAuthModal()" title="Pengaturan Admin Wi-Fi">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3C7.03 3 2.73 5.11 0 8.42L12 21 24 8.42C21.27 5.11 16.97 3 12 3zm0 4.5c3.27 0 6.22 1.25 8.42 3.29L12 19.33 3.58 10.79C5.78 8.75 8.73 7.5 12 7.5z"/>
+      </svg>
+    </button>
+
+    <h2 style="margin-top: 15px;">🔑 Access Code</h2>
     <p class="subtitle">Masukkan password/voucher untuk membuka akses Wi-Fi</p>
 
     <form id="login-form" onsubmit="handleLogin(event)">
@@ -192,10 +262,9 @@
 
   <!-- ================= HALAMAN 2: DASHBOARD WI-FI ================= -->
   <div id="page-wifi" class="hidden">
-    <h2>⚡ Akses Informasi WI-FI</h2>
+    <h2>⚡ Akses Wi-Fi Anda</h2>
     <p class="subtitle">Pindai QR atau salin password di bawah ini</p>
 
-    <!-- Box Informasi Wi-Fi (Terkunci / Read-Only) -->
     <div class="wifi-config">
       <div class="config-group">
         <label for="wifi-ssid">Nama Wi-Fi (SSID)</label>
@@ -210,7 +279,6 @@
       </div>
     </div>
 
-    <!-- QR Code Area -->
     <div class="qr-container">
       <div id="qrcode"></div>
     </div>
@@ -223,13 +291,52 @@
 
 </div>
 
-<script>
-  // ATUR NAMA WIFI DAN PASSWORD DI SINI (Ubah sesuai keinginanmu)
-  const DEFAULT_SSID = "enter_password_";
-  const DEFAULT_PASS = "0998879hjhxcx";
 
-  // SALT KUSTOM UNTUK KEAMANAN ENKRIPSI
-  const GLOBAL_SALT = "Wi-Fi_S3cur3_S@lt_2026!";
+<!-- ================= MODAL AUTH ADMIN ================= -->
+<div id="modal-admin-auth" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 style="color: #38bdf8; margin-bottom: 8px;">⚙️ Verifikasi Admin</h3>
+    <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 16px;">Masukkan Password Admin untuk membuka panel pengaturan</p>
+    
+    <div class="config-group">
+      <label for="admin-pass">Password Admin</label>
+      <input type="password" id="admin-pass" placeholder="Password admin">
+    </div>
+    
+    <button onclick="verifyAdminPassword()" class="btn btn-login">VERIFIKASI</button>
+    <button onclick="closeModal('modal-admin-auth')" class="btn-cancel">Batal</button>
+  </div>
+</div>
+
+
+<!-- ================= MODAL CONFIG WI-FI ================= -->
+<div id="modal-admin-config" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 style="color: #22c55e; margin-bottom: 8px;">📶 Edit Wi-Fi Realtime</h3>
+    <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 16px;">Ubah SSID dan Password Wi-Fi utama</p>
+    
+    <div class="config-group">
+      <label for="edit-ssid">SSID Baru</label>
+      <input type="text" id="edit-ssid">
+    </div>
+    <div class="config-group">
+      <label for="edit-pass">Password Wi-Fi Baru</label>
+      <input type="text" id="edit-pass">
+    </div>
+    
+    <button onclick="saveWifiConfig()" class="btn btn-login">SIMPAN PERUBAHAN</button>
+    <button onclick="closeModal('modal-admin-config')" class="btn-cancel">Batal</button>
+  </div>
+</div>
+
+
+<script>
+  // DEFAULT WI-FI CONFIG
+  let DEFAULT_SSID = "WIFI_PREMIUM_GLASS";
+  let DEFAULT_PASS = "kopi1234";
+
+  // HASH TARGET SHA-256 (Murni tanpa Salt)
+  const ADMIN_HASH_TARGET = "2d7532e279254ca6bf0cd7954e1baf659975803338dfbc9d31058d5e8009f7ea";
 
   // DOM Elements
   const pageLogin = document.getElementById("page-login");
@@ -238,30 +345,25 @@
   const passInput = document.getElementById("wifi-pass");
   const qrContainer = document.getElementById("qrcode");
 
-  // Inisialisasi nilai SSID & Password bawaan
+  // Sync Input Display Initial
   ssidInput.value = DEFAULT_SSID;
   passInput.value = DEFAULT_PASS;
 
-  // Inisialisasi QR Code Instance
-  let qrcode = new QRCode(qrContainer, {
-    width: 120,
-    height: 120
-  });
+  // QR Code Instance
+  let qrcode = new QRCode(qrContainer, { width: 120, height: 120 });
 
-  // Function Generate QR Code
   function generateQRCode() {
     const qrData = `WIFI:S:${DEFAULT_SSID};T:WPA;P:${DEFAULT_PASS};;`;
     qrcode.clear();
     qrcode.makeCode(qrData);
   }
 
-  // Salin Password ke Clipboard
   function copyPassword() {
     navigator.clipboard.writeText(DEFAULT_PASS);
     alert(`Password "${DEFAULT_PASS}" berhasil disalin!`);
   }
 
-  // Fungsi Enkripsi SHA-256
+  // Helper Enkripsi SHA-256 Standar (Murni)
   async function hashSHA256(str) {
     const encoder = new TextEncoder();
     const data = encoder.encode(str);
@@ -270,22 +372,17 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Login Handler
+  // Login Handler User
   async function handleLogin(event) {
     event.preventDefault();
     const rawPass = document.getElementById("password").value;
+    const encryptedPassword = await hashSHA256(rawPass);
 
-    // Enkripsi Password + Salt
-    const saltedPassword = rawPass + GLOBAL_SALT;
-    const encryptedPassword = await hashSHA256(saltedPassword);
+    console.log("=== DATA LOGIN USER ===");
+    console.log("Password Hash SHA-256:", encryptedPassword);
 
-    console.log("=== DATA LOGIN ===");
-    console.log("Password Hash (+Salt):", encryptedPassword);
-
-    // Generate QR Code saat pindah halaman
     generateQRCode();
 
-    // Sembunyikan Halaman 1 (Login), Tampilkan Halaman 2 (Wi-Fi)
     pageLogin.classList.add("hidden");
     pageWifi.classList.remove("hidden");
   }
@@ -293,10 +390,56 @@
   // Logout Handler
   function handleLogout() {
     document.getElementById("password").value = "";
-    
-    // Sembunyikan Halaman 2 (Wi-Fi), Tampilkan Halaman 1 (Login)
     pageWifi.classList.add("hidden");
     pageLogin.classList.remove("hidden");
+  }
+
+  // ================= ADMIN CONFIG LOGIC =================
+
+  function openAdminAuthModal() {
+    document.getElementById("admin-pass").value = "";
+    document.getElementById("modal-admin-auth").classList.remove("hidden");
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.add("hidden");
+  }
+
+  // Verifikasi Password Admin Menggunakan Hash Target Murni
+  async function verifyAdminPassword() {
+    const inputPass = document.getElementById("admin-pass").value;
+    const hashedInput = await hashSHA256(inputPass);
+
+    if (hashedInput === ADMIN_HASH_TARGET) {
+      closeModal("modal-admin-auth");
+      
+      document.getElementById("edit-ssid").value = DEFAULT_SSID;
+      document.getElementById("edit-pass").value = DEFAULT_PASS;
+      
+      document.getElementById("modal-admin-config").classList.remove("hidden");
+    } else {
+      alert("Password Admin Salah / Akses Ditolak!");
+    }
+  }
+
+  // Simpan Perubahan Wi-Fi
+  function saveWifiConfig() {
+    const newSSID = document.getElementById("edit-ssid").value.trim();
+    const newPass = document.getElementById("edit-pass").value.trim();
+
+    if (!newSSID || !newPass) {
+      alert("SSID dan Password tidak boleh kosong!");
+      return;
+    }
+
+    DEFAULT_SSID = newSSID;
+    DEFAULT_PASS = newPass;
+
+    ssidInput.value = DEFAULT_SSID;
+    passInput.value = DEFAULT_PASS;
+
+    closeModal("modal-admin-config");
+    alert("Konfigurasi Wi-Fi Berhasil Diperbarui!");
   }
 </script>
 
