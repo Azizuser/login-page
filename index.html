@@ -124,10 +124,13 @@ button.logout-btn:hover {
 </div>
 
 <script>
-// Hash SHA-256 dari teks: "penguna1122330"
-const PASSWORD_HASH = "4a2b9e663a7f8050901b0f15c7110ad2ee926e838f72df894c25bd2a63273412";
+// Daftar Hash Valid
+const VALID_HASHES = [
+    "4a2b9e663a7f8050901b0f15c7110ad2ee926e838f72df894c25bd2a63273412", // Hash dari "penguna1122330" (1 'n')
+    "9c12403e051d9eb74127c54ef24328dc4350ea0dbbd6d11ee4aaefee007aa22a"  // Hash dari "pengguna1122330" (2 'n')
+];
 
-// Fungsi untuk membuat Hash SHA-256 via Web Crypto API
+// Fungsi Hash SHA-256
 async function sha256(str) {
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf))
@@ -135,7 +138,6 @@ async function sha256(str) {
         .join('');
 }
 
-// Cek status sesi saat halaman dibuka
 window.onload = function() {
     if (sessionStorage.getItem("isLoggedIn") === "true") {
         showAuthenticatedUI();
@@ -143,7 +145,8 @@ window.onload = function() {
 };
 
 async function login() {
-    const inputPass = document.getElementById("password").value;
+    // .trim() akan menghapus spasi tak sengaja di depan/belakang
+    const inputPass = document.getElementById("password").value.trim();
     
     if(!inputPass) {
         document.getElementById("error").innerText = "Password tidak boleh kosong!";
@@ -152,14 +155,12 @@ async function login() {
 
     const inputHash = await sha256(inputPass);
 
-    if (inputHash === PASSWORD_HASH) {
-        // Simpan sesi login
+    // Cek apakah hash hasil ketikan cocok dengan salah satu hash valid
+    if (VALID_HASHES.includes(inputHash)) {
         sessionStorage.setItem("isLoggedIn", "true");
-        
-        // Arahkan langsung ke halaman WiFi Target
         goToWifiPage();
     } else {
-        document.getElementById("error").innerText = "Password salah!";
+        document.getElementById("error").innerText = "Password salah! Perhatikan huruf besar/kecil.";
     }
 }
 
