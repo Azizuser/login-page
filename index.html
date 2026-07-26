@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Wi-Fi</title>
+    <title>Sistem Informasi Wi-Fi & Pendaftaran</title>
     
     <!-- QR Code Generator Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -20,6 +20,7 @@
             --text-color: #f8fafc;
             --danger-color: #ef4444;
             --success-color: #22c55e;
+            --warning-color: #f59e0b;
         }
 
         * {
@@ -44,13 +45,13 @@
             border-radius: 16px;
             padding: 30px;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
             position: relative;
         }
 
-        /* --- TOMBOL ADMIN: LINGKARAN BIRU TERANG BERPENDAR --- */
+        /* TOMBOL ADMIN GLOWING */
         .admin-glow-btn {
             position: absolute;
             top: 20px;
@@ -68,23 +69,13 @@
 
         .admin-glow-btn:hover {
             transform: scale(1.3);
-            box-shadow: 0 0 15px #00f0ff, 0 0 30px #00f0ff;
         }
 
         @keyframes glowing-pulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 0 8px #00f0ff, 0 0 16px #00f0ff;
-                opacity: 0.8;
-            }
-            50% {
-                transform: scale(1.15);
-                box-shadow: 0 0 16px #00f0ff, 0 0 32px #00f0ff, 0 0 45px #38bdf8;
-                opacity: 1;
-            }
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
         }
 
-        /* --- ANIMASI IKON WI-FI KEREN --- */
         .wifi-icon-animated {
             width: 32px;
             height: 32px;
@@ -92,35 +83,8 @@
             stroke: var(--accent-color);
             stroke-width: 2.2;
             stroke-linecap: round;
-            filter: drop-shadow(0 0 6px var(--accent-color));
         }
 
-        .wifi-dot {
-            animation: wifi-pulse 1.8s infinite ease-in-out;
-        }
-
-        .wifi-wave-1 {
-            animation: wifi-pulse 1.8s infinite ease-in-out;
-            animation-delay: 0.3s;
-        }
-
-        .wifi-wave-2 {
-            animation: wifi-pulse 1.8s infinite ease-in-out;
-            animation-delay: 0.6s;
-        }
-
-        @keyframes wifi-pulse {
-            0%, 100% {
-                opacity: 0.3;
-                stroke: #475569;
-            }
-            50% {
-                opacity: 1;
-                stroke: var(--accent-color);
-            }
-        }
-
-        /* Judul dengan Ikon Samping */
         .title-with-icon {
             display: flex;
             align-items: center;
@@ -130,9 +94,7 @@
             color: var(--accent-color);
         }
 
-        h2 {
-            color: var(--accent-color);
-        }
+        h2 { color: var(--accent-color); margin-bottom: 20px; }
 
         .input-group {
             margin-bottom: 15px;
@@ -146,16 +108,13 @@
             color: #94a3b8;
         }
 
-        /* Input Password dengan Ikon Mata Line Modern & Glowing */
         .password-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
 
-        .password-wrapper input {
-            padding-right: 42px;
-        }
+        .password-wrapper input { padding-right: 42px; }
 
         .toggle-password {
             position: absolute;
@@ -167,30 +126,15 @@
             padding: 6px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
         }
 
         .toggle-password svg {
-            width: 20px;
-            height: 20px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2;
         }
 
-        .toggle-password:hover {
-            color: var(--accent-color);
-        }
+        .toggle-password:hover { color: var(--accent-color); }
 
-        .toggle-password.active {
-            color: var(--accent-color);
-            filter: drop-shadow(0 0 6px var(--accent-color));
-        }
-
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -208,32 +152,17 @@
             background-color: var(--accent-color);
             color: #0f172a;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
             transition: 0.3s;
             margin-top: 10px;
         }
 
-        button.btn-secondary {
-            background-color: #334155;
-            color: #fff;
-        }
-
-        button.btn-success {
-            background-color: var(--success-color);
-            color: #fff;
-        }
-
-        button.btn-danger {
-            background-color: transparent;
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
-            margin-top: 15px;
-        }
-
-        button.btn-primary:hover, button.btn-danger:hover, button.btn-secondary:hover, button.btn-success:hover {
-            opacity: 0.85;
-        }
+        button.btn-secondary { background-color: #334155; color: #fff; }
+        button.btn-success { background-color: var(--success-color); color: #fff; }
+        button.btn-danger { background-color: transparent; color: var(--danger-color); border: 1px solid var(--danger-color); }
+        
+        button:hover { opacity: 0.85; }
 
         #qrcode {
             margin: 15px auto;
@@ -241,10 +170,6 @@
             background: #fff;
             border-radius: 12px;
             display: inline-block;
-        }
-
-        #qrcode img {
-            margin: 0 auto;
         }
 
         .info-box {
@@ -263,23 +188,18 @@
             align-items: center;
         }
 
-        .info-item span {
-            color: var(--accent-color);
-            font-weight: bold;
-        }
+        .info-item span { color: var(--accent-color); font-weight: bold; }
 
-        .copy-btn {
+        .copy-btn, .action-table-btn {
             background: none;
             border: none;
-            color: #94a3b8;
             cursor: pointer;
-            font-size: 14px;
-            margin-left: 8px;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
         }
-
-        .copy-btn:hover {
-            color: var(--accent-color);
-        }
+        .copy-btn:hover { color: var(--accent-color); }
+        .action-table-btn { margin: 2px; }
 
         .action-grid {
             display: grid;
@@ -288,49 +208,100 @@
             margin-top: 10px;
         }
 
-        .hidden {
-            display: none !important;
+        .table-container {
+            max-height: 180px;
+            overflow-y: auto;
+            margin-top: 8px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            margin-bottom: 15px;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #334155;
+        }
+
+        th { background-color: #0f172a; color: var(--accent-color); position: sticky; top: 0; z-index: 1; }
+
+        .badge-pending { color: var(--warning-color); font-weight: bold; font-size: 11px; }
+        .badge-approved { color: var(--success-color); font-weight: bold; font-size: 11px; }
+
+        .link-text {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .link-text span {
+            color: var(--accent-color);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <!-- 1. HALAMAN LOGIN USER -->
     <div id="userLoginCard" class="container">
-        <!-- Tombol Admin Lingkaran Glowing -->
         <div class="admin-glow-btn" title="Login Admin" onclick="openAdminModalFromStart()"></div>
-        
-        <h2 style="margin-bottom: 20px;">Akses Wi-Fi</h2>
+        <h2>Login User Wi-Fi</h2>
         <form onsubmit="loginUser(event)">
             <div class="input-group">
-                <label>Masukkan Passcode Kunjungan:</label>
+                <label>Username:</label>
+                <input type="text" id="loginUsername" placeholder="Username terdaftar..." required>
+            </div>
+            <div class="input-group">
+                <label>Password:</label>
                 <div class="password-wrapper">
-                    <input type="password" id="userPassInput" placeholder="Password User..." required>
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('userPassInput', this)">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <line class="eye-off-line" x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
+                    <input type="password" id="loginPassword" placeholder="Password..." required>
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </button>
                 </div>
             </div>
-            <button type="submit" class="btn-primary">Masuk User</button>
+            <button type="submit" class="btn-primary">Masuk</button>
+        </form>
+        <div class="link-text">
+            Belum punya akun? <span onclick="showRegisterPage()">Daftar di sini</span>
+        </div>
+    </div>
+
+    <!-- 1.1 HALAMAN PENDAFTARAN (REGISTER) -->
+    <div id="userRegisterCard" class="container hidden">
+        <h2>Daftar Akun Baru</h2>
+        <form onsubmit="registerUser(event)">
+            <div class="input-group">
+                <label>Buat Username:</label>
+                <input type="text" id="regUsername" placeholder="Username..." required>
+            </div>
+            <div class="input-group">
+                <label>Buat Password:</label>
+                <div class="password-wrapper">
+                    <input type="password" id="regPassword" placeholder="Password..." required>
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="btn-primary btn-success">Kirim Permintaan Daftar</button>
+            <button type="button" class="btn-primary btn-secondary" onclick="showLoginPage()">Kembali ke Login</button>
         </form>
     </div>
 
-    <!-- 2. HALAMAN UTAMA (QR CODE & DETAIL) -->
+    <!-- 2. HALAMAN UTAMA (QR CODE & DETAIL WI-FI) -->
     <div id="wifiCard" class="container hidden">
-        <!-- Tombol Admin Lingkaran Glowing -->
         <div class="admin-glow-btn" title="Panel Admin" onclick="openAdminModal()"></div>
-        
-        <!-- Judul Disertai Ikon Sinyal Wi-Fi Beranimasi -->
         <div class="title-with-icon">
-            <svg class="wifi-icon-animated" viewBox="0 0 24 24" style="width:36px; height:36px;">
-                <path class="wifi-wave-2" d="M2 8.82a15 15 0 0 1 20 0"/>
-                <path class="wifi-wave-1" d="M5 12.5a10 10 0 0 1 14 0"/>
-                <path class="wifi-dot" d="M8.5 16.5a5 5 0 0 1 7 0M12 20h.01"/>
-            </svg>
+            <svg class="wifi-icon-animated" viewBox="0 0 24 24"><path d="M2 8.82a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16.5a5 5 0 0 1 7 0M12 20h.01"/></svg>
             <h2>Scan Wi-Fi</h2>
         </div>
         
@@ -339,11 +310,11 @@
         <div class="info-box">
             <div class="info-item">
                 <div>SSID: <span id="displaySSID">Loading...</span></div>
-                <button class="copy-btn" title="Salin SSID" onclick="copyToClipboard('displaySSID', 'SSID')">📋 Salin</button>
+                <button class="copy-btn" onclick="copyToClipboard('displaySSID', 'SSID')">📋 Salin</button>
             </div>
             <div class="info-item">
                 <div>Password: <span id="displayPass">Loading...</span></div>
-                <button class="copy-btn" title="Salin Password" onclick="copyToClipboard('displayPass', 'Password')">📋 Salin</button>
+                <button class="copy-btn" onclick="copyToClipboard('displayPass', 'Password')">📋 Salin</button>
             </div>
         </div>
 
@@ -352,53 +323,83 @@
             <button class="btn-primary btn-secondary" style="margin-top:0;" onclick="copyAllConfig()">📋 Salin Semua</button>
         </div>
 
-        <button class="btn-primary btn-danger" onclick="logout()">Logout / Keluar</button>
+        <button class="btn-primary btn-danger" onclick="logout()">Logout</button>
     </div>
 
     <!-- 3. MODAL LOGIN ADMIN -->
     <div id="adminLoginCard" class="container hidden">
-        <h2 style="margin-bottom: 20px;">Login Admin</h2>
+        <h2>Login Admin</h2>
         <form onsubmit="loginAdmin(event)">
             <div class="input-group">
                 <label>Password Admin:</label>
                 <div class="password-wrapper">
                     <input type="password" id="adminPassInput" placeholder="Password Admin..." required>
                     <button type="button" class="toggle-password" onclick="togglePasswordVisibility('adminPassInput', this)">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <line class="eye-off-line" x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
+                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </button>
                 </div>
             </div>
             <button type="submit" class="btn-primary">Masuk Admin</button>
-            <button type="button" class="btn-primary btn-secondary" style="margin-top: 5px;" onclick="closeAdminModal()">Batal</button>
+            <button type="button" class="btn-primary btn-secondary" onclick="closeAdminModal()">Batal</button>
         </form>
     </div>
 
     <!-- 4. MODAL PANEL ADMIN -->
-    <div id="adminPanelCard" class="container hidden">
-        <h2 style="margin-bottom: 20px;">Pengaturan Wi-Fi</h2>
-        <div class="input-group">
-            <label>SSID Baru:</label>
-            <input type="text" id="editSSID">
+    <div id="adminPanelCard" class="container hidden" style="max-width: 500px;">
+        <h2>Panel Admin</h2>
+        
+        <!-- Pengaturan Wi-Fi -->
+        <div style="text-align: left; margin-bottom: 15px;">
+            <h3 style="font-size: 15px; color: var(--accent-color); margin-bottom: 8px;">Pengaturan Wi-Fi</h3>
+            <div class="input-group" style="margin-bottom: 10px;">
+                <label>SSID Baru:</label>
+                <input type="text" id="editSSID">
+            </div>
+            <div class="input-group" style="margin-bottom: 10px;">
+                <label>Password Wi-Fi Baru:</label>
+                <input type="text" id="editPass">
+            </div>
+            <button class="btn-primary" style="margin-top:0;" onclick="saveWifiConfig()">Simpan Perubahan Wi-Fi</button>
         </div>
-        <div class="input-group">
-            <label>Password Wi-Fi Baru:</label>
-            <div class="password-wrapper">
-                <input type="password" id="editPass">
-                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('editPass', this)">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <line class="eye-off-line" x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                </button>
+
+        <!-- Tabel Permintaan Pending -->
+        <div style="text-align: left;">
+            <h3 style="font-size: 15px; color: var(--accent-color); margin-bottom: 5px;">Permintaan Akun Pending</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingUsersTable">
+                        <tr><td colspan="2" style="text-align: center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <button class="btn-primary" onclick="saveWifiConfig()">Simpan Perubahan</button>
-        <button class="btn-primary btn-secondary" style="margin-top: 5px;" onclick="closeAdminPanel()">Tutup</button>
+
+        <!-- Tabel Seluruh Akun Terdaftar -->
+        <div style="text-align: left;">
+            <h3 style="font-size: 15px; color: var(--accent-color); margin-bottom: 5px;">Daftar Seluruh Pengguna</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allUsersTable">
+                        <tr><td colspan="3" style="text-align: center;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <button class="btn-primary btn-secondary" style="margin-top: 10px;" onclick="closeAdminPanel()">Tutup Panel</button>
     </div>
 
     <script>
@@ -410,10 +411,7 @@
 
         let qrcode = new QRCode(document.getElementById("qrcode"), { width: 180, height: 180 });
         
-        // HASH TARGET
-        const USER_HASH = "1667a88832e79fe57d342ac316f4b662c88d23dc549a78caa4fc54604471007c";
         const ADMIN_HASH = "2d7532e279254ca6bf0cd7954e1baf659975803338dfbc9d31058d5e8009f7ea";
-
         let cameFromStart = false;
 
         async function getHash(text) {
@@ -423,15 +421,14 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        // Sinkronisasi Data Wi-Fi dari Firebase
         database.ref('wifiConfig').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 const ssid = data.ssid || "-";
                 const pass = data.pass || "-";
-
                 document.getElementById('displaySSID').innerText = ssid;
                 document.getElementById('displayPass').innerText = pass;
-
                 document.getElementById('editSSID').value = ssid;
                 document.getElementById('editPass').value = pass;
 
@@ -441,68 +438,152 @@
             }
         });
 
+        // Sinkronisasi & Render Data User di Panel Admin
+        database.ref('users').on('value', (snapshot) => {
+            const users = snapshot.val();
+            const pendingTbody = document.getElementById('pendingUsersTable');
+            const allTbody = document.getElementById('allUsersTable');
+            
+            pendingTbody.innerHTML = "";
+            allTbody.innerHTML = "";
+
+            let hasPending = false;
+            let hasUsers = false;
+
+            if (users) {
+                for (let key in users) {
+                    let user = users[key];
+                    hasUsers = true;
+
+                    // Baris untuk Tabel Semua User
+                    let statusBadge = user.status === "approved" 
+                        ? `<span class="badge-approved">Approved</span>` 
+                        : `<span class="badge-pending">Pending</span>`;
+
+                    allTbody.innerHTML += `
+                        <tr>
+                            <td>${user.username}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <button class="btn-danger action-table-btn" onclick="deleteUser('${key}')">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+
+                    // Baris khusus untuk Tabel Pending
+                    if (user.status === "pending") {
+                        hasPending = true;
+                        pendingTbody.innerHTML += `
+                            <tr>
+                                <td>${user.username}</td>
+                                <td>
+                                    <button class="btn-success action-table-btn" onclick="approveUser('${key}')">Setujui</button>
+                                    <button class="btn-danger action-table-btn" onclick="deleteUser('${key}')">Tolak</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            }
+
+            if (!hasPending) {
+                pendingTbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #64748b;">Tidak ada permintaan baru</td></tr>`;
+            }
+
+            if (!hasUsers) {
+                allTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b;">Belum ada akun terdaftar</td></tr>`;
+            }
+        });
+
         function togglePasswordVisibility(inputId, btn) {
             const input = document.getElementById(inputId);
-            const eyeLine = btn.querySelector('.eye-off-line');
-
-            if (input.type === "password") {
-                input.type = "text";
-                btn.classList.add('active');
-                if (eyeLine) eyeLine.style.display = 'none';
-            } else {
-                input.type = "password";
-                btn.classList.remove('active');
-                if (eyeLine) eyeLine.style.display = 'block';
-            }
+            input.type = input.type === "password" ? "text" : "password";
         }
 
-        function copyToClipboard(elementId, label) {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`${label} berhasil disalin!`);
+        function showRegisterPage() {
+            document.getElementById('userLoginCard').classList.add('hidden');
+            document.getElementById('userRegisterCard').classList.remove('hidden');
+        }
+
+        function showLoginPage() {
+            document.getElementById('userRegisterCard').classList.add('hidden');
+            document.getElementById('userLoginCard').classList.remove('hidden');
+        }
+
+        // Proses Pendaftaran User Baru
+        async function registerUser(event) {
+            event.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const hashedPassword = await getHash(password);
+
+            database.ref('users').orderByChild('username').equalTo(username).once('value', async (snapshot) => {
+                if (snapshot.exists()) {
+                    alert("Username sudah digunakan, silakan gunakan username lain!");
+                } else {
+                    await database.ref('users').push({
+                        username: username,
+                        password: hashedPassword,
+                        status: "pending"
+                    });
+                    alert("Pendaftaran berhasil! Silakan tunggu persetujuan dari admin.");
+                    document.getElementById('regUsername').value = "";
+                    document.getElementById('regPassword').value = "";
+                    showLoginPage();
+                }
             });
         }
 
-        function copyAllConfig() {
-            const ssid = document.getElementById('displaySSID').innerText;
-            const pass = document.getElementById('displayPass').innerText;
-            const textToCopy = `SSID: ${ssid}\nPassword: ${pass}`;
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert("SSID dan Password berhasil disalin!");
-            });
-        }
-
-        function downloadQRCode() {
-            const qrImg = document.querySelector("#qrcode img");
-            if (qrImg && qrImg.src) {
-                const link = document.createElement("a");
-                link.href = qrImg.src;
-                link.download = "wifi-qrcode.png";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                alert("QR Code belum siap untuk diunduh.");
-            }
-        }
-
+        // Proses Login User
         async function loginUser(event) {
-            if (event) event.preventDefault();
-            const input = document.getElementById('userPassInput').value.trim();
-            const hashedInput = await getHash(input);
-            
-            if (hashedInput === USER_HASH) {
-                document.getElementById('userLoginCard').classList.add('hidden');
-                document.getElementById('wifiCard').classList.remove('hidden');
-                document.getElementById('userPassInput').value = '';
-            } else {
-                alert("Password Salah!");
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const hashedPassword = await getHash(password);
+
+            database.ref('users').orderByChild('username').equalTo(username).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    let userData = null;
+                    snapshot.forEach((childSnapshot) => {
+                        userData = childSnapshot.val();
+                    });
+
+                    if (userData.password === hashedPassword) {
+                        if (userData.status === "approved") {
+                            document.getElementById('userLoginCard').classList.add('hidden');
+                            document.getElementById('wifiCard').classList.remove('hidden');
+                            document.getElementById('loginUsername').value = "";
+                            document.getElementById('loginPassword').value = "";
+                        } else {
+                            alert("Akun Anda belum disetujui oleh Admin!");
+                        }
+                    } else {
+                        alert("Password salah!");
+                    }
+                } else {
+                    alert("Username tidak ditemukan!");
+                }
+            });
+        }
+
+        // Setujui User (Admin)
+        function approveUser(userId) {
+            database.ref('users/' + userId).update({ status: "approved" }, () => {
+                alert("Akun berhasil disetujui!");
+            });
+        }
+
+        // Hapus User Kapan Saja (Admin)
+        function deleteUser(userId) {
+            if (confirm("Apakah Anda yakin ingin menghapus akun ini?")) {
+                database.ref('users/' + userId).remove(() => {
+                    alert("Akun berhasil dihapus.");
+                });
             }
         }
 
         async function loginAdmin(event) {
-            if (event) event.preventDefault();
+            event.preventDefault();
             const input = document.getElementById('adminPassInput').value.trim();
             const hashedInput = await getHash(input);
 
@@ -559,11 +640,31 @@
                 ssid: newSSID,
                 pass: newPass
             }).then(() => {
-                alert("Data berhasil tersimpan ke Firebase!");
-                closeAdminPanel();
-            }).catch((err) => {
-                alert("Gagal menyimpan data: " + err.message);
+                alert("Konfigurasi Wi-Fi berhasil diperbarui!");
             });
+        }
+
+        function copyToClipboard(elementId, label) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => { alert(`${label} berhasil disalin!`); });
+        }
+
+        function copyAllConfig() {
+            const ssid = document.getElementById('displaySSID').innerText;
+            const pass = document.getElementById('displayPass').innerText;
+            navigator.clipboard.writeText(`SSID: ${ssid}\nPassword: ${pass}`).then(() => { alert("Berhasil disalin!"); });
+        }
+
+        function downloadQRCode() {
+            const qrImg = document.querySelector("#qrcode img");
+            if (qrImg && qrImg.src) {
+                const link = document.createElement("a");
+                link.href = qrImg.src;
+                link.download = "wifi-qrcode.png";
+                link.click();
+            } else {
+                alert("QR Code belum siap.");
+            }
         }
     </script>
 </body>
